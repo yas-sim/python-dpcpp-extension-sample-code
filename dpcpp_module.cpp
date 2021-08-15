@@ -44,7 +44,9 @@ static PyObject* image_convolution(PyObject* self, PyObject* args) {
     int halfFilterWidth  = (int)(kernel_width/2); 
     int halfFilterHeight = (int)(kernel_height/2);
 
-    queue q{cpu_selector()};                // Create a SYCL queue  default_selector | cpu_selector | host_selector | gpu_selector
+    // Create a SYCL queue  
+    // default_selector | cpu_selector | host_selector | gpu_selector
+    queue q(default_selector{});
 
     // Create SYCL buffer objects from existing buffers
     buffer<uint8_t, 1> image_in_buf(in_buf,   range<1>(num_rows * num_cols));
@@ -54,18 +56,21 @@ static PyObject* image_convolution(PyObject* self, PyObject* args) {
 
     // Submit a job to SYCL
     q.submit([&](handler &h) {
+
         // Before the kernel code. The code here will be run by the host device (CPU)
 
         // Get access to the buffer objects (to be run on the host device)
         auto srcPtr = image_in_buf.get_access<access::mode::read>(h);
         auto dstPtr = image_out_buf.get_access<access::mode::write>(h);
         auto fltPtr = filter_buf.get_access<access::mode::read>(h);
-        // Actual SYCL kernel to be run on the specified device
+
+        // Actual kernel code to run on the specified device
         h.parallel_for(num_items, [=](id<2> item) {
             int row = item[0];
             int col = item[1];
             float sum = 0.0f;
-            for (int fy = -halfFilterHeight; fy <= halfFilterHeight; fy++) { // halfFilterHeight is a variable in host device memory space but kernel code can refer to it.
+            // 'halfFilterHeight' is a variable in host device memory space but kernel code can refer to it.
+            for (int fy = -halfFilterHeight; fy <= halfFilterHeight; fy++) {
                 for (int fx = -halfFilterWidth; fx <= halfFilterWidth; fx++) {
                     int yy = row + fy;
                     int xx = col + fx;
@@ -81,7 +86,9 @@ static PyObject* image_convolution(PyObject* self, PyObject* args) {
             sum = (sum>255.0) ? 255.0 : (sum<0) ? 0 : sum;   // Check for uint8_t overflow
             dstPtr[row * num_cols + col] = (uint8_t)sum;
         });
+
         // After the kernel code. The code here will be run by the host device (CPU)
+
     });
 
     return output_image;
@@ -108,7 +115,7 @@ PyModuleDef test_module = {
 // Function name must be 'PyInit_'+module name
 // This function must be the only *non-static* function in the source code
 PyMODINIT_FUNC PyInit_python_dpcpp_module(void) {
-    import_array();                                 // Required to receive Numpy object as arguments
+    import_array();                     // Required to receive Numpy object as arguments
     if (PyErr_Occurred()) {
         return nullptr;
     }
