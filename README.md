@@ -1,9 +1,8 @@
-# Sample code of Python extension module written in DPC++ (Data Parallel C++)  
+# Sample code of Python extension module using DPC++ (Data Parallel C++)  
 
 ### Description:  
-This project demonstrates how to write a Python extension module with DPC++. DPC++ is used to write an image processing kernel in the Python extension. The Python extension will take an OpenCV image stored in a Numpy array and do image processing.  
-DPC++ is a Clang based compiler including SYCL extension developed by Intel. It enables seamless heterogeneous computing by support of SYCL and Intel specific extensions for SYCL.  
-Numpy object and OpenCV Mat object interaction code example is also included.  
+This project demonstrates how to write a Python extension module with [DPC++](https://software.intel.com/content/www/us/en/develop/tools/oneapi/components/dpc-compiler.html#gs.8eyara). The Python extension will take an OpenCV image stored in a Numpy array and do image processing. The actual image processing code is using DPC++ kernel and the rest is written in standard C++ code.  
+DPC++ is a Clang based compiler developed by Intel which includs Khronos [SYCL](https://www.khronos.org/sycl/) extension and Intel specific SYCL extensions. **It enables seamless heterogeneous programming and can support not only CPU but also integrated GPU, FPGA and more to come**.  
 
 * Result example
 ![image](./resources/result.png)
