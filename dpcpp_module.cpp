@@ -14,7 +14,7 @@
 
 using namespace cl::sycl;
 
-extern "C";
+extern "C" {
 
 // Simple image processing function (convolution filter)
 static PyObject* image_convolution(PyObject* self, PyObject* args) {
@@ -121,3 +121,5 @@ PyMODINIT_FUNC PyInit_python_dpcpp_module(void) {
     }
     return PyModule_Create(&test_module);
 }
+
+} // extern "C"
